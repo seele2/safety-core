@@ -39,4 +39,10 @@ public class EncryptAutoConfiguration {
 		return new EncryptInterceptor(cipher(), jude(), !Objects.equals(encryptConf.getFlushType(), EncryptFlushType.DECRYPT));
 	}
 
+	@Bean
+	@ConditionalOnMissingBean(DesensitizeInterceptor.class)
+	public DesensitizeInterceptor desensitizeInterceptor() {
+		return new DesensitizeInterceptor();
+	}
+
 }
