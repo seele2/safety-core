@@ -14,7 +14,7 @@ public enum DesensitizeEnum {
 
     PHONE(source -> source.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2")),
 
-    ID_CARD(source -> source.replaceAll("(\\d{4}\\d{10}(\\d{4}))", "$1**********$2")),
+    ID_CARD(source -> source.replaceAll("(\\d{4})\\d{10}(\\d{4})", "$1**********$2")),
 
     ADDRESS(source -> source.replaceAll("(\\S{8})\\S{4}(\\S*)\\S{4}", "$1****$2****")),
     ;

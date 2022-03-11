@@ -8,6 +8,7 @@ import com.seele2.encrypt.lazy.DefaultEncryptCipher;
 import com.seele2.encrypt.lazy.DefaultEncryptJude;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,31 +19,43 @@ import java.util.Objects;
 @Configuration
 public class EncryptAutoConfiguration {
 
-	@Autowired
-	private EncryptConf encryptConf;
+    @Autowired
+    private EncryptConf encryptConf;
 
-	@Bean
-	@ConditionalOnMissingBean(EncryptCipher.class)
-	public EncryptCipher cipher() {
-		return new DefaultEncryptCipher();
-	}
+    @Bean
+    @ConditionalOnMissingBean(EncryptCipher.class)
+    public EncryptCipher cipher() {
+        return new DefaultEncryptCipher();
+    }
 
-	@Bean
-	@ConditionalOnMissingBean(EncryptJude.class)
-	public EncryptJude jude() {
-		return new DefaultEncryptJude(encryptConf.getEncryptTables());
-	}
+    @Bean
+    @ConditionalOnMissingBean(EncryptJude.class)
+    public EncryptJude jude() {
+        return new DefaultEncryptJude(encryptConf.getEncryptTables());
+    }
 
-	@Bean
-	@ConditionalOnMissingBean(EncryptInterceptor.class)
-	public EncryptInterceptor encryptInterceptor() {
-		return new EncryptInterceptor(cipher(), jude(), !Objects.equals(encryptConf.getFlushType(), EncryptFlushType.DECRYPT));
-	}
+//    @Bean
+//    @ConditionalOnMissingBean(EncryptInterceptor.class)
+//    public EncryptInterceptor encryptInterceptor() {
+//        return new EncryptInterceptor(cipher(), jude(), !Objects.equals(encryptConf.getFlushType(), EncryptFlushType.DECRYPT));
+//    }
 
-	@Bean
-	@ConditionalOnMissingBean(DesensitizeInterceptor.class)
-	public DesensitizeInterceptor desensitizeInterceptor() {
-		return new DesensitizeInterceptor();
-	}
+    /**
+     * TODO
+     *   DecryptInterceptor 一定要在 DesensitizeInterceptor 之前初始化
+     *   后续考虑 AutoConfigureAfter 将 DesensitizeInterceptor 滞后
+     *   目前依靠代码执行顺序即可
+     */
+    @Bean
+    public DecryptInterceptor decryptInterceptor() {
+        return new DecryptInterceptor(cipher());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DesensitizeInterceptor.class)
+    public DesensitizeInterceptor desensitizeInterceptor() {
+        return new DesensitizeInterceptor();
+    }
+
 
 }

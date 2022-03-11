@@ -12,7 +12,40 @@ public final class StrHelper {
 	private StrHelper() {
 	}
 
-	/**
+
+
+    /**
+     * 字符串是否为空
+     *
+     * @param cs 字符串
+     * @return 是否是空串
+     */
+    public static boolean isBlank(final CharSequence cs) {
+        final int strLen = length(cs);
+        if (strLen == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 字符串长度
+     *
+     * @param cs 字段串
+     * @return 长度
+     */
+    public static int length(final CharSequence cs) {
+        return cs == null ? 0 : cs.length();
+    }
+
+
+
+    /**
 	 * 目标字符串出现得次数
 	 *
 	 * @param tar 目标字符串
