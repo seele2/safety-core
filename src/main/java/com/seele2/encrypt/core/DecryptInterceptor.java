@@ -1,8 +1,8 @@
 package com.seele2.encrypt.core;
 
-import com.seele2.encrypt.annotation.Decrypt;
-import com.seele2.encrypt.base.EncryptCipher;
-import com.seele2.encrypt.tool.StrHelper;
+import com.seele2.encrypt.annotation.Safety;
+import com.seele2.encrypt.base.SafetyCipher;
+import com.seele2.encrypt.manager.SafetyManager;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
@@ -13,54 +13,52 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 
 import java.lang.reflect.Field;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-/**
- * TODO 仅对实体生效
- */
-@Intercepts(
-        @Signature(type = ResultSetHandler.class, method = "handleResultSets", args = {Statement.class})
-)
+@Intercepts(@Signature(type = ResultSetHandler.class, method = "handleResultSets", args = {Statement.class}))
 public class DecryptInterceptor implements Interceptor {
 
-    private final EncryptCipher encryptCipher;
-
-    public DecryptInterceptor(EncryptCipher encryptCipher) {
-        this.encryptCipher = encryptCipher;
-    }
 
     @Override
     @SuppressWarnings("unchecked")
     public Object intercept(Invocation invocation) throws Throwable {
         List<Object> rows = (List<Object>) invocation.proceed();
-        rows.forEach(this::decrypt);
+        rows.forEach(this::handle);
         return rows;
     }
 
+    @SuppressWarnings("unchecked")
+    private void handle(Object res) {
+        if (res instanceof Map) {
+            decrypt((Map<String, Object>) res);
+        }
+        else {
+            MetaObject  meta   = SystemMetaObject.forObject(res);
+            Class<?>    clazz  = res.getClass();
+            List<Field> fields = getFields(clazz);
+            fields.parallelStream().filter(field -> field.isAnnotationPresent(Safety.class)).forEach(field -> decrypt(meta, field));
+        }
+    }
 
-    private void decrypt(Object res) {
-        MetaObject  meta   = SystemMetaObject.forObject(res);
-        Class<?>    clazz  = res.getClass();
-        List<Field> fields = getFields(clazz);
-        fields.parallelStream()
-                .filter(field -> field.isAnnotationPresent(Decrypt.class))
-                .forEach(field -> decrypt(meta, field))
-        ;
+    private void decrypt(Map<String, Object> map) {
+        map.forEach((k, v) -> {
+            if (Objects.isNull(v)) return;
+            if (SafetyManager.isPresent(k)) {
+                SafetyCipher cipher = SafetyManager.getDecryptCipher(k);
+                map.put(k, cipher.decrypt(v));
+            }
+        });
     }
 
     private void decrypt(MetaObject meta, Field field) {
-        String fieldName = field.getName();
-        Object value     = meta.getValue(fieldName);
+        String name  = field.getName();
+        Object value = meta.getValue(name);
         if (Objects.isNull(value)) return;
-        if (Objects.equals(String.class, meta.getGetterType(fieldName)) && !StrHelper.isBlank((String) value)) {
-            if (!field.isAccessible()) {
-                field.setAccessible(true);
-            }
-            meta.setValue(fieldName, encryptCipher.decrypt(value));
+        SafetyCipher cipher = SafetyManager.getDecryptCipher(field);
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
         }
+        meta.setValue(name, cipher.decrypt(value));
     }
 
     /**

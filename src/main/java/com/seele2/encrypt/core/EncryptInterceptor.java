@@ -1,7 +1,7 @@
 package com.seele2.encrypt.core;
 
 import com.seele2.encrypt.SqlType;
-import com.seele2.encrypt.base.EncryptCipher;
+import com.seele2.encrypt.base.SafetyCipher;
 import com.seele2.encrypt.base.EncryptJude;
 import com.seele2.encrypt.entity.EncryptTable;
 import com.seele2.encrypt.tool.StrHelper;
@@ -34,13 +34,13 @@ public class EncryptInterceptor implements Interceptor {
 
 	private final Log log = LogFactory.getLog(getClass());
 
-	private final EncryptCipher cipher;
+	private final SafetyCipher cipher;
 
 	private final EncryptJude jude;
 
 	private final boolean active;
 
-	public EncryptInterceptor(EncryptCipher cipher, EncryptJude jude, boolean active) {
+	public EncryptInterceptor(SafetyCipher cipher, EncryptJude jude, boolean active) {
 		this.cipher = cipher;
 		this.jude   = jude;
 		this.active = active;
@@ -64,7 +64,7 @@ public class EncryptInterceptor implements Interceptor {
 			EncryptTable table = extractTable(getSql(statement, param), type);
 			if (pass(type)) {
 				Object result = invocation.proceed();
-				decrypt(result, table);
+//				decrypt(result, table);
 				return result;
 			} else {
 				if (!Objects.isNull(param)) {
@@ -72,7 +72,7 @@ public class EncryptInterceptor implements Interceptor {
 					invocation = new Invocation(invocation.getTarget(), invocation.getMethod(), args);
 				}
 				Object result = invocation.proceed();
-				decrypt(result, table);
+//				decrypt(result, table);
 				return result;
 			}
 		} catch (Exception e) {

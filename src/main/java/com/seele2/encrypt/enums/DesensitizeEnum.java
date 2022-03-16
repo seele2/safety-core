@@ -1,4 +1,4 @@
-package com.seele2.encrypt.entity.enums;
+package com.seele2.encrypt.enums;
 
 import java.util.function.Function;
 
@@ -10,6 +10,17 @@ import java.util.function.Function;
  */
 public enum DesensitizeEnum {
 
+    /**
+     * 用户名
+     * <p>
+     * example:
+     * <pre>
+     *      王   ->  王
+     *      王某  -> 王*
+     *      王某某  -> 王*某
+     *      王某某某 -> 王*某某
+     * </pre>
+     */
     USERNAME(source -> source.replaceAll("(\\S)\\S(\\S*)", "$1*$2")),
 
     PHONE(source -> source.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2")),

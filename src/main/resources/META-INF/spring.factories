@@ -1,1 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.seele2.encrypt.conf.EncryptConf
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.seele2.encrypt.conf.EncryptConf,\
+  com.seele2.encrypt.factory.CipherFactory,\
+  com.seele2.encrypt.manager.SafetyManager
