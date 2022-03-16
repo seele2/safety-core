@@ -3,6 +3,7 @@ package com.seele2.encrypt.core;
 import com.seele2.encrypt.annotation.Safety;
 import com.seele2.encrypt.base.SafetyCipher;
 import com.seele2.encrypt.manager.SafetyManager;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
@@ -10,6 +11,7 @@ import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.springframework.util.StopWatch;
 
 import java.lang.reflect.Field;
 import java.sql.Statement;
@@ -18,29 +20,39 @@ import java.util.*;
 @Intercepts(@Signature(type = ResultSetHandler.class, method = "handleResultSets", args = {Statement.class}))
 public class DecryptInterceptor implements Interceptor {
 
-
     @Override
     @SuppressWarnings("unchecked")
     public Object intercept(Invocation invocation) throws Throwable {
+        StopWatch stopWatch = new StopWatch("解密统计");
+        stopWatch.start("获取数据");
         List<Object> rows = (List<Object>) invocation.proceed();
-        rows.forEach(this::handle);
+        stopWatch.stop();
+        stopWatch.start("数据解密");
+        decrypt(rows);
+        stopWatch.stop();
+        System.out.println(stopWatch.prettyPrint());
         return rows;
     }
 
     @SuppressWarnings("unchecked")
-    private void handle(Object res) {
-        if (res instanceof Map) {
-            decrypt((Map<String, Object>) res);
+    private void decrypt(List<Object> rows) {
+        if (CollectionUtils.isEmpty(rows)) return;
+        Object o = rows.get(0);
+        if (o instanceof Map) {
+            rows.parallelStream().forEach(i -> doDecryptMap((Map<String, Object>) i));
         }
         else {
-            MetaObject  meta   = SystemMetaObject.forObject(res);
-            Class<?>    clazz  = res.getClass();
-            List<Field> fields = getFields(clazz);
-            fields.parallelStream().filter(field -> field.isAnnotationPresent(Safety.class)).forEach(field -> decrypt(meta, field));
+            Set<Field> fields = getFields(o.getClass());
+            rows.parallelStream().forEach(i -> doDecryptEntity(i, fields));
         }
     }
 
-    private void decrypt(Map<String, Object> map) {
+    private void doDecryptEntity(Object row, Set<Field> fields) {
+        fields.stream().filter(field -> field.isAnnotationPresent(Safety.class))
+                .forEach(field -> decrypt(SystemMetaObject.forObject(row), field.getName()));
+    }
+
+    private void doDecryptMap(Map<String, Object> map) {
         map.forEach((k, v) -> {
             if (Objects.isNull(v)) return;
             if (SafetyManager.isPresent(k)) {
@@ -50,15 +62,11 @@ public class DecryptInterceptor implements Interceptor {
         });
     }
 
-    private void decrypt(MetaObject meta, Field field) {
-        String name  = field.getName();
-        Object value = meta.getValue(name);
+    private void decrypt(MetaObject meta, String fieldName) {
+        Object value = meta.getValue(fieldName);
         if (Objects.isNull(value)) return;
-        SafetyCipher cipher = SafetyManager.getDecryptCipher(field);
-        if (!field.isAccessible()) {
-            field.setAccessible(true);
-        }
-        meta.setValue(name, cipher.decrypt(value));
+        SafetyCipher cipher = SafetyManager.getDecryptCipher(fieldName);
+        meta.setValue(fieldName, cipher.decrypt(value));
     }
 
     /**
@@ -67,8 +75,8 @@ public class DecryptInterceptor implements Interceptor {
      * @param clazz 对象类型
      * @return 声明字段
      */
-    private List<Field> getFields(Class<?> clazz) {
-        List<Field> fields = new ArrayList<>();
+    private Set<Field> getFields(Class<?> clazz) {
+        Set<Field> fields = new HashSet<>();
         while (clazz != null) {
             fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
             clazz = clazz.getSuperclass();

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.seele2.encrypt.annotation.Desensitize;
-import com.seele2.encrypt.enums.DesensitizeEnum;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -27,12 +26,11 @@ public class DesensitizeSerializer extends JsonSerializer<String> implements Con
         if (Objects.isNull(annotation)) {
             annotation = beanProperty.getContextAnnotation(Desensitize.class);
         }
-        if (Objects.isNull(annotation))
+        if (Objects.isNull(annotation)) {
             return serializerProvider.findValueSerializer(beanProperty.getType(), beanProperty);
-
+        }
         return new DesensitizeSerializer(annotation);
     }
-
 
     @Override
     public void serialize(String s, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
@@ -40,9 +38,7 @@ public class DesensitizeSerializer extends JsonSerializer<String> implements Con
             jsonGenerator.writeString(s);
         }
         else {
-            DesensitizeEnum type  = desensitize.type();
-            String          apply = type.getFunc().apply(s);
-            jsonGenerator.writeString(apply);
+            jsonGenerator.writeString(desensitize.type().getFunc().apply(s));
         }
     }
 }

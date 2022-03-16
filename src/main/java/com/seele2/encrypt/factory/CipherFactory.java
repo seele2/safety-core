@@ -1,39 +1,41 @@
 package com.seele2.encrypt.factory;
 
 import com.seele2.encrypt.base.SafetyCipher;
+import com.seele2.encrypt.base.SimpleCache;
 import com.seele2.encrypt.enums.SafetyCipherEnum;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Component
 public class CipherFactory implements ApplicationListener<ContextRefreshedEvent> {
 
-    private static final Map<SafetyCipherEnum, SafetyCipher> maps = new HashMap<>();
+    private static final SimpleCache<SafetyCipherEnum, SafetyCipher> CIPHER_POOL = new SimpleCache<>();
 
     public static SafetyCipher getEncryptCipher(SafetyCipherEnum cipher) {
-        SafetyCipher encryptCipher = maps.get(cipher);
-        int          loop          = 0;
+        SafetyCipher encryptCipher = CIPHER_POOL.getValue(cipher);
+
+        // TODO 应该使用自旋锁, 理论上这里能获取到，但考虑到极端情况进行兼容处理
+        int loop = 0;
         while (null == encryptCipher) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(300);
             } catch (InterruptedException ignored) {
                 if (loop >= 3) {
                     throw new RuntimeException("plug init failed !");
                 }
                 loop++;
             }
-            encryptCipher = maps.get(cipher);
+            encryptCipher = CIPHER_POOL.getValue(cipher);
         }
+
         return encryptCipher;
     }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
-        Map<String, SafetyCipher> beansOfType = contextRefreshedEvent.getApplicationContext().getBeansOfType(SafetyCipher.class);
-        beansOfType.forEach((__, v) -> maps.put(v.getType(), v));
+        contextRefreshedEvent.getApplicationContext()
+                .getBeansOfType(SafetyCipher.class)
+                .forEach((__, v) -> CIPHER_POOL.put(v.getType(), v));
     }
 }
