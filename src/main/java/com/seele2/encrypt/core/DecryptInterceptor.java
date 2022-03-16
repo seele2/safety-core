@@ -16,6 +16,7 @@ import org.springframework.util.StopWatch;
 import java.lang.reflect.Field;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Intercepts(@Signature(type = ResultSetHandler.class, method = "handleResultSets", args = {Statement.class}))
 public class DecryptInterceptor implements Interceptor {
@@ -42,14 +43,21 @@ public class DecryptInterceptor implements Interceptor {
             rows.parallelStream().forEach(i -> doDecryptMap((Map<String, Object>) i));
         }
         else {
-            Set<Field> fields = getFields(o.getClass());
-            rows.parallelStream().forEach(i -> doDecryptEntity(i, fields));
+            final List<Field> fields = getFields(o.getClass()).stream()
+                    .filter(field -> field.isAnnotationPresent(Safety.class))
+                    .collect(Collectors.toList());
+            rows.parallelStream().forEach(i -> doDecryptEntity(SystemMetaObject.forObject(i), fields));
         }
     }
 
-    private void doDecryptEntity(Object row, Set<Field> fields) {
-        fields.stream().filter(field -> field.isAnnotationPresent(Safety.class))
-                .forEach(field -> decrypt(SystemMetaObject.forObject(row), field.getName()));
+    private void doDecryptEntity(MetaObject meta, List<Field> fields) {
+        fields.forEach(field -> {
+            String fieldName = field.getName();
+            Object value     = meta.getValue(fieldName);
+            if (Objects.isNull(value)) return;
+            SafetyCipher cipher = SafetyManager.getDecryptCipher(fieldName);
+            meta.setValue(fieldName, cipher.decrypt(value));
+        });
     }
 
     private void doDecryptMap(Map<String, Object> map) {
@@ -60,13 +68,6 @@ public class DecryptInterceptor implements Interceptor {
                 map.put(k, cipher.decrypt(v));
             }
         });
-    }
-
-    private void decrypt(MetaObject meta, String fieldName) {
-        Object value = meta.getValue(fieldName);
-        if (Objects.isNull(value)) return;
-        SafetyCipher cipher = SafetyManager.getDecryptCipher(fieldName);
-        meta.setValue(fieldName, cipher.decrypt(value));
     }
 
     /**
