@@ -41,7 +41,7 @@ public class EncryptAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(EncryptInterceptor.class)
     public EncryptInterceptor encryptInterceptor() {
-        return new EncryptInterceptor(cipher(), jude(), true);
+        return new EncryptInterceptor( true);
     }
 
 

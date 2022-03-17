@@ -51,13 +51,12 @@ public class SafetyManager implements ApplicationListener<ContextRefreshedEvent>
      * @param key 字段名
      * @return 解密器
      */
-    public static SafetyCipher getDecryptCipher(String key) {
-        String       basename     = FieldTool.getBasename(key);
-        SafetyCipher safetyCipher = CIPHER_POOL.getValue(basename);
+    public static SafetyCipher getSafetyCipher(String key) {
+        SafetyCipher safetyCipher = CIPHER_POOL.getValue(key);
         if (null == safetyCipher) {
-            safetyCipher = CipherFactory.getEncryptCipher(FIELD_POOL.getValue(basename)
+            safetyCipher = CipherFactory.getSafetyCipher(FIELD_POOL.getValue(key)
                     .getAnnotation(Safety.class).cipher());
-            CIPHER_POOL.put(basename, safetyCipher);
+            CIPHER_POOL.put(key, safetyCipher);
         }
         return safetyCipher;
     }
@@ -67,7 +66,7 @@ public class SafetyManager implements ApplicationListener<ContextRefreshedEvent>
                 .forEach(field -> {
                     Safety   annotation = field.getAnnotation(Safety.class);
                     String[] alias      = annotation.alias();
-                    String   basename   = FieldTool.getBasename(field);
+                    String[] basename   = FieldTool.getBasename(field);
                     Stream.concat(Arrays.stream(alias), Stream.of(basename))
                             .filter(StringUtils::isNotBlank)
                             .forEach(name -> FIELD_POOL.put(name, field));

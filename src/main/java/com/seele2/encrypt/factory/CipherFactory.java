@@ -12,7 +12,7 @@ public class CipherFactory implements ApplicationListener<ContextRefreshedEvent>
 
     private static final SimpleCache<SafetyCipherEnum, SafetyCipher> CIPHER_POOL = new SimpleCache<>();
 
-    public static SafetyCipher getEncryptCipher(SafetyCipherEnum cipher) {
+    public static SafetyCipher getSafetyCipher(SafetyCipherEnum cipher) {
         SafetyCipher safetyCipher = CIPHER_POOL.getValue(cipher);
         // 理论上这里能获取到，但考虑到极端情况进行兼容处理
         if (null == safetyCipher) {

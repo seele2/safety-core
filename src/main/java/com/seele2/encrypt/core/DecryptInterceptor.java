@@ -55,7 +55,7 @@ public class DecryptInterceptor implements Interceptor {
             String fieldName = field.getName();
             Object value     = meta.getValue(fieldName);
             if (Objects.isNull(value)) return;
-            SafetyCipher cipher = SafetyManager.getDecryptCipher(fieldName);
+            SafetyCipher cipher = SafetyManager.getSafetyCipher(fieldName);
             meta.setValue(fieldName, cipher.decrypt(value));
         });
     }
@@ -64,7 +64,7 @@ public class DecryptInterceptor implements Interceptor {
         map.forEach((k, v) -> {
             if (Objects.isNull(v)) return;
             if (SafetyManager.isPresent(k)) {
-                SafetyCipher cipher = SafetyManager.getDecryptCipher(k);
+                SafetyCipher cipher = SafetyManager.getSafetyCipher(k);
                 map.put(k, cipher.decrypt(v));
             }
         });

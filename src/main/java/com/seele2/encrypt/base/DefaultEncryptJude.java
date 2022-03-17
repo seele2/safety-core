@@ -35,7 +35,7 @@ public class DefaultEncryptJude implements EncryptJude {
 			if (Objects.equals(table.getName().toLowerCase(), name)) {
 				Set<String> fields = table.getFields();
 				for (String f : fields) {
-					if (Objects.equals(FieldTool.getBasename(field), FieldTool.getBasename(f))) {
+					if (Objects.equals(FieldTool.getSnakeName(field), FieldTool.getSnakeName(f))) {
 						return true;
 					}
 				}
