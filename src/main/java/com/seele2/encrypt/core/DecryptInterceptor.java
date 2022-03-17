@@ -1,8 +1,8 @@
 package com.seele2.encrypt.core;
 
 import com.seele2.encrypt.annotation.Safety;
-import com.seele2.encrypt.base.SafetyCipher;
 import com.seele2.encrypt.manager.SafetyManager;
+import com.seele2.encrypt.tool.FieldTool;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.plugin.Interceptor;
@@ -24,14 +24,14 @@ public class DecryptInterceptor implements Interceptor {
     @Override
     @SuppressWarnings("unchecked")
     public Object intercept(Invocation invocation) throws Throwable {
-        StopWatch stopWatch = new StopWatch("解密统计");
-        stopWatch.start("获取数据");
+        StopWatch watch = new StopWatch("解密统计");
+        watch.start("获取数据");
         List<Object> rows = (List<Object>) invocation.proceed();
-        stopWatch.stop();
-        stopWatch.start("数据解密");
+        watch.stop();
+        watch.start("解密数据");
         decrypt(rows);
-        stopWatch.stop();
-        System.out.println(stopWatch.prettyPrint());
+        watch.stop();
+        System.out.println(watch.prettyPrint());
         return rows;
     }
 
@@ -43,7 +43,7 @@ public class DecryptInterceptor implements Interceptor {
             rows.parallelStream().forEach(i -> doDecryptMap((Map<String, Object>) i));
         }
         else {
-            final List<Field> fields = getFields(o.getClass()).stream()
+            final List<Field> fields = FieldTool.getFields(o.getClass()).stream()
                     .filter(field -> field.isAnnotationPresent(Safety.class))
                     .collect(Collectors.toList());
             rows.parallelStream().forEach(i -> doDecryptEntity(SystemMetaObject.forObject(i), fields));
@@ -69,20 +69,4 @@ public class DecryptInterceptor implements Interceptor {
             }
         });
     }
-
-    /**
-     * 获取目标对象声明的全部字段，包括继承的字段
-     *
-     * @param clazz 对象类型
-     * @return 声明字段
-     */
-    private Set<Field> getFields(Class<?> clazz) {
-        Set<Field> fields = new HashSet<>();
-        while (clazz != null) {
-            fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-            clazz = clazz.getSuperclass();
-        }
-        return fields;
-    }
-
 }

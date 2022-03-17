@@ -1,8 +1,8 @@
-package com.seele2.encrypt.lazy;
+package com.seele2.encrypt.base;
 
-import com.seele2.encrypt.base.EncryptJude;
+import com.seele2.encrypt.core.EncryptJude;
 import com.seele2.encrypt.entity.EncryptTable;
-import com.seele2.encrypt.tool.CamelSnakeHelper;
+import com.seele2.encrypt.tool.FieldTool;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +35,7 @@ public class DefaultEncryptJude implements EncryptJude {
 			if (Objects.equals(table.getName().toLowerCase(), name)) {
 				Set<String> fields = table.getFields();
 				for (String f : fields) {
-					if (Objects.equals(CamelSnakeHelper.toSnakeCase(field), CamelSnakeHelper.toSnakeCase(f))) {
+					if (Objects.equals(FieldTool.getBasename(field), FieldTool.getBasename(f))) {
 						return true;
 					}
 				}

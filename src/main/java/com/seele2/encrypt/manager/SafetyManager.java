@@ -1,10 +1,10 @@
 package com.seele2.encrypt.manager;
 
 import com.seele2.encrypt.annotation.Safety;
-import com.seele2.encrypt.base.SafetyCipher;
-import com.seele2.encrypt.base.SimpleCache;
+import com.seele2.encrypt.core.SafetyCipher;
+import com.seele2.encrypt.tool.FieldTool;
+import com.seele2.encrypt.tool.SimpleCache;
 import com.seele2.encrypt.factory.CipherFactory;
-import com.seele2.encrypt.tool.CamelSnakeHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -53,22 +52,26 @@ public class SafetyManager implements ApplicationListener<ContextRefreshedEvent>
      * @return 解密器
      */
     public static SafetyCipher getDecryptCipher(String key) {
-        SafetyCipher safetyCipher = CIPHER_POOL.getValue(key);
-        if (Objects.isNull(safetyCipher)) {
-            safetyCipher = CipherFactory.getEncryptCipher(FIELD_POOL.getValue(key)
+        String       basename     = FieldTool.getBasename(key);
+        SafetyCipher safetyCipher = CIPHER_POOL.getValue(basename);
+        if (null == safetyCipher) {
+            safetyCipher = CipherFactory.getEncryptCipher(FIELD_POOL.getValue(basename)
                     .getAnnotation(Safety.class).cipher());
-            CIPHER_POOL.put(key, safetyCipher);
+            CIPHER_POOL.put(basename, safetyCipher);
         }
         return safetyCipher;
     }
 
     public static void addField(Field... fields) {
-        Arrays.stream(fields).parallel().filter(field -> field.isAnnotationPresent(Safety.class)).forEach(field -> {
-            Safety   annotation = field.getAnnotation(Safety.class);
-            String[] alias      = annotation.alias();
-            String   basename   = getBasename(field);
-            Stream.concat(Arrays.stream(alias), Stream.of(basename)).filter(StringUtils::isNotBlank).forEach(name -> FIELD_POOL.put(name, field));
-        });
+        Arrays.stream(fields).parallel().filter(field -> field.isAnnotationPresent(Safety.class))
+                .forEach(field -> {
+                    Safety   annotation = field.getAnnotation(Safety.class);
+                    String[] alias      = annotation.alias();
+                    String   basename   = FieldTool.getBasename(field);
+                    Stream.concat(Arrays.stream(alias), Stream.of(basename))
+                            .filter(StringUtils::isNotBlank)
+                            .forEach(name -> FIELD_POOL.put(name, field));
+                });
     }
 
     @Override
@@ -101,14 +104,5 @@ public class SafetyManager implements ApplicationListener<ContextRefreshedEvent>
         }
     }
 
-    /**
-     * 获取字段本身蛇形名称
-     *
-     * @param field 字段
-     * @return 蛇形名称
-     */
-    private static String getBasename(Field field) {
-        String name = field.getName();
-        return CamelSnakeHelper.toSnakeCase(name);
-    }
+
 }

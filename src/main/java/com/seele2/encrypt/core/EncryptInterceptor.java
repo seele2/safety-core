@@ -1,10 +1,8 @@
 package com.seele2.encrypt.core;
 
 import com.seele2.encrypt.SqlType;
-import com.seele2.encrypt.base.SafetyCipher;
-import com.seele2.encrypt.base.EncryptJude;
 import com.seele2.encrypt.entity.EncryptTable;
-import com.seele2.encrypt.tool.StrHelper;
+import com.seele2.encrypt.tool.StringTool;
 import lombok.SneakyThrows;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,10 +81,10 @@ public class EncryptInterceptor implements Interceptor {
 
 	private boolean isComposite(String sql) {
 		return Stream.of(
-				StrHelper.contains(SqlType.INSERT.name(), sql),
-				StrHelper.contains(SqlType.UPDATE.name(), sql),
-				StrHelper.contains(SqlType.DELETE.name(), sql),
-				StrHelper.contains(SqlType.SELECT.name(), sql)
+				StringTool.contains(SqlType.INSERT.name(), sql),
+				StringTool.contains(SqlType.UPDATE.name(), sql),
+				StringTool.contains(SqlType.DELETE.name(), sql),
+				StringTool.contains(SqlType.SELECT.name(), sql)
 		).mapToInt(i -> i).sum() > 1;
 	}
 

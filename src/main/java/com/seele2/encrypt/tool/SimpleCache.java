@@ -1,4 +1,4 @@
-package com.seele2.encrypt.base;
+package com.seele2.encrypt.tool;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +18,5 @@ public final class SimpleCache<K, V> {
     public V getValue(K k) {
         return pool.get(k);
     }
-
 
 }

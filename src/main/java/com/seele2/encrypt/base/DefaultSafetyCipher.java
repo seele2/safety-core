@@ -1,10 +1,11 @@
-package com.seele2.encrypt.lazy;
+package com.seele2.encrypt.base;
 
-import com.seele2.encrypt.base.SafetyCipher;
+import com.seele2.encrypt.core.SafetyCipher;
 import com.seele2.encrypt.enums.SafetyCipherEnum;
-import com.seele2.encrypt.tool.Base64Helper;
-import com.seele2.encrypt.tool.StrHelper;
+import com.seele2.encrypt.tool.StringTool;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 public class DefaultSafetyCipher implements SafetyCipher {
@@ -15,6 +16,9 @@ public class DefaultSafetyCipher implements SafetyCipher {
 
     private static final int step = 4;
 
+    private static final Base64.Encoder encoder = Base64.getEncoder();
+    private static final Base64.Decoder decoder = Base64.getDecoder();
+
     @Override
     public SafetyCipherEnum getType() {
         return SafetyCipherEnum.DEFAULT;
@@ -22,9 +26,9 @@ public class DefaultSafetyCipher implements SafetyCipher {
 
     @Override
     public String encrypt(Object s) {
-        List<String>  str = StrHelper.breakup(transToString(s));
+        List<String>  str = StringTool.breakup(transToString(s));
         StringBuilder sb  = new StringBuilder();
-        str.forEach(i -> sb.append(Base64Helper.encode(i)));
+        str.forEach(i -> sb.append(encoder.encodeToString(StringTool.bytes(i, StandardCharsets.UTF_8))));
         return sb.toString().replace(targetStr, replaceStr);
     }
 
@@ -35,7 +39,7 @@ public class DefaultSafetyCipher implements SafetyCipher {
         int           c   = (int) Math.ceil((double) len / step);
         StringBuilder sb  = new StringBuilder();
         for (int i = 0; i < c; i++) {
-            sb.append(new String(Base64Helper.decode(str.substring(i * step, Math.min(i * step + step, len)))));
+            sb.append(new String(Base64.getDecoder().decode(str.substring(i * step, Math.min(i * step + step, len)))));
         }
         return sb.toString();
     }

@@ -1,10 +1,10 @@
 package com.seele2.encrypt.conf;
 
-import com.seele2.encrypt.base.SafetyCipher;
-import com.seele2.encrypt.base.EncryptJude;
+import com.seele2.encrypt.core.SafetyCipher;
+import com.seele2.encrypt.core.EncryptJude;
 import com.seele2.encrypt.core.*;
-import com.seele2.encrypt.lazy.DefaultSafetyCipher;
-import com.seele2.encrypt.lazy.DefaultEncryptJude;
+import com.seele2.encrypt.base.DefaultSafetyCipher;
+import com.seele2.encrypt.base.DefaultEncryptJude;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

@@ -1,4 +1,4 @@
-package com.seele2.encrypt.base;
+package com.seele2.encrypt.core;
 
 public interface EncryptJude {
 
