@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "jz.kr")
+@ConfigurationProperties(prefix = "seele2.encrypt")
 public class EncryptConf {
 
     /**

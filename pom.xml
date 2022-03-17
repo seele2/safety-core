@@ -5,7 +5,7 @@
 
     <groupId>com.seele2</groupId>
     <artifactId>encrypt-spring-boot-starter</artifactId>
-    <version>0.0.8</version>
+    <version>0.1.0</version>
     <name>encrypt</name>
     <description>适用于mybatis框架、mysql数据库字段加解密组件</description>
 

@@ -1,6 +1,6 @@
 package com.seele2.encrypt.core;
 
-public interface EncryptFlusher {
+public interface SafetyFlusher {
 
 	void encrypt();
 

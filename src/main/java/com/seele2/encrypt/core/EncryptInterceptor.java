@@ -1,6 +1,7 @@
 package com.seele2.encrypt.core;
 
 import com.seele2.encrypt.annotation.Safety;
+import com.seele2.encrypt.enums.SafetyScopeEnum;
 import com.seele2.encrypt.manager.SafetyManager;
 import com.seele2.encrypt.tool.FieldTool;
 import org.apache.ibatis.cache.CacheKey;
@@ -47,7 +48,8 @@ public class EncryptInterceptor implements Interceptor {
         Class<?>   clazz  = param.getClass();
         MetaObject meta   = SystemMetaObject.forObject(param);
         Set<Field> fields = FieldTool.getFields(clazz);
-        fields.stream().filter(field -> field.isAnnotationPresent(Safety.class))
+        fields.stream()
+                .filter(field -> field.isAnnotationPresent(Safety.class) && !field.getAnnotation(Safety.class).scope().equals(SafetyScopeEnum.DECRYPT))
                 .forEach(field -> {
                     String fieldName = field.getName();
                     Object value     = meta.getValue(fieldName);

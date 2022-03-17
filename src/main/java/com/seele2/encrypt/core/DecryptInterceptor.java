@@ -1,6 +1,7 @@
 package com.seele2.encrypt.core;
 
 import com.seele2.encrypt.annotation.Safety;
+import com.seele2.encrypt.enums.SafetyScopeEnum;
 import com.seele2.encrypt.manager.SafetyManager;
 import com.seele2.encrypt.tool.FieldTool;
 import org.apache.commons.collections4.CollectionUtils;
@@ -37,7 +38,7 @@ public class DecryptInterceptor implements Interceptor {
         }
         else {
             final List<Field> fields = FieldTool.getFields(o.getClass()).stream()
-                    .filter(field -> field.isAnnotationPresent(Safety.class))
+                    .filter(field -> field.isAnnotationPresent(Safety.class) && !field.getAnnotation(Safety.class).scope().equals(SafetyScopeEnum.ENCRYPT))
                     .collect(Collectors.toList());
             rows.parallelStream().forEach(i -> doDecryptEntity(SystemMetaObject.forObject(i), fields));
         }

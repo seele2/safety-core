@@ -1,7 +1,7 @@
 package com.seele2.encrypt.actuator;
 
 import com.seele2.encrypt.enums.FlushTypeEnum;
-import com.seele2.encrypt.core.EncryptFlusher;
+import com.seele2.encrypt.core.SafetyFlusher;
 import com.seele2.encrypt.conf.EncryptConf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -15,7 +15,7 @@ public class FlushActuator implements CommandLineRunner {
 	private final EncryptConf encryptConf;
 
 	@Autowired(required = false)
-	private EncryptFlusher flusher;
+	private SafetyFlusher flusher;
 
 	public FlushActuator(EncryptConf encryptConf) {
 		this.encryptConf = encryptConf;
