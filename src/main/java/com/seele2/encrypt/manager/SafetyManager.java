@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -54,23 +55,19 @@ public class SafetyManager implements ApplicationListener<ContextRefreshedEvent>
     public static SafetyCipher getSafetyCipher(String key) {
         SafetyCipher safetyCipher = CIPHER_POOL.getValue(key);
         if (null == safetyCipher) {
-            safetyCipher = CipherFactory.getSafetyCipher(FIELD_POOL.getValue(key)
-                    .getAnnotation(Safety.class).cipher());
+            safetyCipher = CipherFactory.getSafetyCipher(FIELD_POOL.getValue(key).getAnnotation(Safety.class).cipher());
             CIPHER_POOL.put(key, safetyCipher);
         }
         return safetyCipher;
     }
 
     public static void addField(Field... fields) {
-        Arrays.stream(fields).parallel().filter(field -> field.isAnnotationPresent(Safety.class))
-                .forEach(field -> {
-                    Safety   annotation = field.getAnnotation(Safety.class);
-                    String[] alias      = annotation.alias();
-                    String[] basename   = FieldTool.getBasename(field);
-                    Stream.concat(Arrays.stream(alias), Stream.of(basename))
-                            .filter(StringUtils::isNotBlank)
-                            .forEach(name -> FIELD_POOL.put(name, field));
-                });
+        Arrays.stream(fields).parallel().filter(field -> field.isAnnotationPresent(Safety.class)).forEach(field -> {
+            Safety   annotation = field.getAnnotation(Safety.class);
+            String[] alias      = annotation.alias();
+            String[] basename   = FieldTool.getBasename(field);
+            Stream.concat(Arrays.stream(alias), Stream.of(basename)).filter(StringUtils::isNotBlank).forEach(name -> FIELD_POOL.put(name, field));
+        });
     }
 
     @Override
@@ -96,8 +93,8 @@ public class SafetyManager implements ApplicationListener<ContextRefreshedEvent>
                 MetadataReader reader    = readerFactory.getMetadataReader(resource);
                 String         classname = reader.getClassMetadata().getClassName();
                 Class<?>       clazz     = Class.forName(classname);
-                Field[]        fields    = clazz.getDeclaredFields();
-                addField(Arrays.stream(fields).parallel().filter(field -> field.isAnnotationPresent(Safety.class)).toArray(Field[]::new));
+                Set<Field>     fields    = FieldTool.getFields(clazz);
+                addField(fields.parallelStream().filter(field -> field.isAnnotationPresent(Safety.class)).toArray(Field[]::new));
             }
         } catch (IOException | ClassNotFoundException ignored) {
         }

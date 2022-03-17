@@ -1,9 +1,9 @@
 package com.seele2.encrypt.conf;
 
+import com.seele2.encrypt.cipher.Base64Cipher;
 import com.seele2.encrypt.core.DecryptInterceptor;
 import com.seele2.encrypt.core.EncryptInterceptor;
-import com.seele2.encrypt.core.SafetyCipher;
-import com.seele2.encrypt.base.DefaultSafetyCipher;
+import com.seele2.encrypt.cipher.DefaultCipher;
 import lombok.Data;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +14,11 @@ import org.springframework.context.annotation.Configuration;
 public class EncryptAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(SafetyCipher.class)
-    public SafetyCipher cipher() {
-        return new DefaultSafetyCipher();
+    public Base64Cipher base64Cipher() { return new Base64Cipher(); }
+
+    @Bean
+    public DefaultCipher defaultCipher() {
+        return new DefaultCipher();
     }
 
     @Bean
@@ -24,7 +26,6 @@ public class EncryptAutoConfiguration {
     public DecryptInterceptor decryptInterceptor() {
         return new DecryptInterceptor();
     }
-
 
     @Bean
     @ConditionalOnMissingBean(EncryptInterceptor.class)

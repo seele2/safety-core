@@ -60,7 +60,7 @@ public enum DesensitizeEnum {
      * <pre>
      * </pre>
      */
-    ADDRESS(source -> source.replaceAll("(\\S{8})\\S{4}(\\S*)\\S{4}", "$1****$2****")),
+    ADDRESS(source -> source.replaceAll("(\\S{5})\\S{4}(\\S*)\\S{5}", "$1****$2****")),
     ;
 
     private final Function<String, String> func;

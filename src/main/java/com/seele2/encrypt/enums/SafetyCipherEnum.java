@@ -6,5 +6,13 @@ public enum SafetyCipherEnum {
 
     BASE64,
 
+    AES,
+
+    RSA,
+
+    SM2,
+
+    SM4,
+
     CUSTOM;
 }
