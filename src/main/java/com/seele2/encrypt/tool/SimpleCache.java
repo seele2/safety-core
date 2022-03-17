@@ -1,6 +1,6 @@
 package com.seele2.encrypt.tool;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class SimpleCache<K, V> {

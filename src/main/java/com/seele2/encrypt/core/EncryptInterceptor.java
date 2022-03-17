@@ -3,7 +3,6 @@ package com.seele2.encrypt.core;
 import com.seele2.encrypt.annotation.Safety;
 import com.seele2.encrypt.manager.SafetyManager;
 import com.seele2.encrypt.tool.FieldTool;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -18,9 +17,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * TODO 暂时不支持递归处理
+ * 加密拦截器，依托于 mybatis 的 Param 注解的参数名进行判定处理
  */
-@Slf4j
 @Intercepts({
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}),
@@ -29,16 +27,8 @@ import java.util.*;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class EncryptInterceptor implements Interceptor {
 
-
-    private final boolean active;
-
-    public EncryptInterceptor(boolean active) {
-        this.active = active;
-    }
-
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        if (!active) return invocation.proceed();
         encrypt(invocation);
         return invocation.proceed();
     }

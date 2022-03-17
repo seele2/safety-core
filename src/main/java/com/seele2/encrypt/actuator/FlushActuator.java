@@ -1,6 +1,6 @@
 package com.seele2.encrypt.actuator;
 
-import com.seele2.encrypt.EncryptFlushType;
+import com.seele2.encrypt.enums.FlushTypeEnum;
 import com.seele2.encrypt.core.EncryptFlusher;
 import com.seele2.encrypt.conf.EncryptConf;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class FlushActuator implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		EncryptFlushType type = encryptConf.getFlushType();
+		FlushTypeEnum type = encryptConf.getFlushType();
 		switch (type) {
 			case EMPTY:
 				break;

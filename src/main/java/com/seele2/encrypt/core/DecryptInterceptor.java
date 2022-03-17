@@ -11,7 +11,6 @@ import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
-import org.springframework.util.StopWatch;
 
 import java.lang.reflect.Field;
 import java.sql.Statement;
@@ -24,14 +23,8 @@ public class DecryptInterceptor implements Interceptor {
     @Override
     @SuppressWarnings("unchecked")
     public Object intercept(Invocation invocation) throws Throwable {
-        StopWatch watch = new StopWatch("解密统计");
-        watch.start("获取数据");
         List<Object> rows = (List<Object>) invocation.proceed();
-        watch.stop();
-        watch.start("解密数据");
         decrypt(rows);
-        watch.stop();
-        System.out.println(watch.prettyPrint());
         return rows;
     }
 
