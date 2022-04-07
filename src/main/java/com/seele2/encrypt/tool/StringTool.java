@@ -25,13 +25,6 @@ public final class StringTool {
         return String.valueOf(s);
     }
 
-
-//    public static byte[] toByte(Object o){
-//        String s = transToStr(o);
-//
-//    }
-
-
     /**
      * 编码字符串
      *

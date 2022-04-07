@@ -8,6 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * 变种Base64，以牺牲空间和性能来换取模糊查询的能力
+ */
 public class DefaultCipher implements SafetyCipher {
 
     private static final String targetStr = "==";

@@ -19,4 +19,9 @@ public final class SimpleCache<K, V> {
         return pool.get(k);
     }
 
+    public boolean empty() {
+        return pool.isEmpty();
+    }
+
+
 }

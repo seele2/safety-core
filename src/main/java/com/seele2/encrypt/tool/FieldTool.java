@@ -62,33 +62,18 @@ public class FieldTool {
     }
 
 
+    /**
+     * 获取字段名
+     *
+     * @param field 字段
+     * @return 字段的本名、蛇形名、驼峰名
+     */
     public static String[] getBasename(Field field) {
         String[] basename = new String[3];
         basename[0] = field.getName();
         basename[1] = getFieldName(field, BasenameType.Snake);
         basename[2] = getFieldName(field, BasenameType.Camel);
         return basename;
-    }
-
-
-    /**
-     * 获取字段本身蛇形名称
-     *
-     * @param field 字段
-     * @return 蛇形名称
-     */
-    public static String getSnakeName(String field) {
-        return getFieldName(field, BasenameType.Snake);
-    }
-
-    /**
-     * 获取字段本身蛇形名称
-     *
-     * @param field 字段
-     * @return 蛇形名称
-     */
-    public static String getSnakeName(Field field) {
-        return getFieldName(field.getName(), BasenameType.Snake);
     }
 
     /**
@@ -98,10 +83,6 @@ public class FieldTool {
      * @param type  名称类型
      * @return 字段名称
      */
-    public static String getFieldName(String field, BasenameType type) {
-        return type.fun.apply(field);
-    }
-
     public static String getFieldName(Field field, BasenameType type) {
         return type.fun.apply(field.getName());
     }
